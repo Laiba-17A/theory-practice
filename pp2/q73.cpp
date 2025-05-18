@@ -5,7 +5,7 @@
 using namespace std;
 
 class Student {
-    int id;           // Changed to non-const for binary read/write
+    int id;          
     string name;
     char gender;
     float quiz1, quiz2, midterm, finalExam;
@@ -55,29 +55,29 @@ public:
         out.write((char*)&total, sizeof(total));
     }
 
-    void readFromBinary(ifstream &in) {
-        in.read((char*)&id, sizeof(id));
+   void readFromBinary(ifstream &in) {
+    in.read((char*)&id, sizeof(id));
 
-        size_t length;
-        in.read((char*)&length, sizeof(length));
-        char* buffer = new char[length + 1];
-        in.read(buffer, length);
-        buffer[length] = '\0';
-        name = string(buffer);
-        delete[] buffer;
+    size_t length;
+    in.read((char*)&length, sizeof(length));
 
-        in.read((char*)&gender, sizeof(gender));
-        in.read((char*)&quiz1, sizeof(quiz1));
-        in.read((char*)&quiz2, sizeof(quiz2));
-        in.read((char*)&midterm, sizeof(midterm));
-        in.read((char*)&finalExam, sizeof(finalExam));
-        in.read((char*)&total, sizeof(total));
-    }
+    string temp(length, '\0'); // Create a string with `length` null chars
+    in.read(&temp[0], length);      // Read directly into the string's internal buffer
+    name = temp;
+
+    in.read((char*)&gender, sizeof(gender));
+    in.read((char*)&quiz1, sizeof(quiz1));
+    in.read((char*)&quiz2, sizeof(quiz2));
+    in.read((char*)&midterm, sizeof(midterm));
+    in.read((char*)&finalExam, sizeof(finalExam));
+    in.read((char*)&total, sizeof(total));
+}
+
 };
 
 vector<Student> loadFromFile(const string& filename) {
     vector<Student> students;
-    ifstream in(filename, ios::binary);
+    ifstream in(filename.c_str(), ios::binary);
     if (!in) {
         cout << "File not found, starting with empty list.\n";
         return students;
@@ -94,7 +94,7 @@ vector<Student> loadFromFile(const string& filename) {
 }
 
 void saveToFile(const string& filename, const vector<Student>& students) {
-    ofstream out(filename, ios::binary);
+    ofstream out(filename.c_str(), ios::binary);
     size_t count = students.size();
     out.write((char*)&count, sizeof(count));
     for (const auto& s : students) {
