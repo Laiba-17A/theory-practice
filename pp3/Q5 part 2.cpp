@@ -123,22 +123,28 @@ string User::Ask(string query) {
 void Analysis() {
     ifstream fin("error_log.txt");
     string line;
+
+    // Arrays to store usernames and corresponding error counts
     string usernames[100];
     int counts[100] = {0};
     int index = 0;
 
+    // First pass: Count how many times each user appears (i.e., caused exceptions)
     while (getline(fin, line)) {
+        // Extract username from line (assumes format "username:query")
         string uname = line.substr(0, line.find(':'));
         bool found = false;
 
+        // Check if username is already in the list
         for (int i = 0; i < index; i++) {
             if (usernames[i] == uname) {
-                counts[i]++;
+                counts[i]++; // Increase their error count
                 found = true;
                 break;
             }
         }
 
+        // If new username, add it to the array
         if (!found) {
             usernames[index] = uname;
             counts[index] = 1;
@@ -147,28 +153,33 @@ void Analysis() {
     }
     fin.close();
 
+    // Find the user with the maximum number of exceptions
     int maxIndex = 0;
     for (int i = 1; i < index; i++) {
         if (counts[i] > counts[maxIndex]) maxIndex = i;
     }
 
-    cout << "User with most exceptions: " << usernames[maxIndex] << " (" << counts[maxIndex] << " errors)" << endl;
+    cout << "User with most exceptions: " << usernames[maxIndex]
+         << " (" << counts[maxIndex] << " errors)" << endl;
 
-    // Word count per user
+    // Second pass: Count and display number of words in each user's query
     ifstream fin2("error_log.txt");
     string line2;
     while (getline(fin2, line2)) {
+        // Extract username and query
         string uname = line2.substr(0, line2.find(':'));
         string query = line2.substr(line2.find(':') + 1);
+
+        // Count words in the query
         int word_count = 1;
         for (int i = 0; i < query.length(); i++) {
             if (query[i] == ' ') word_count++;
         }
+
         cout << uname << ": " << word_count << " words" << endl;
     }
     fin2.close();
 }
-
 // Main
 int main() {
     User u1("Alice", "USA", "technology", 28);
